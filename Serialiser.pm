@@ -99,6 +99,8 @@ Returns false iff C<$value> is C<$Types::Serialiser::error>.
 
 =cut
 
+use Types::Bool qw(true false);
+
 BEGIN {
    # for historical reasons, and to avoid extra dependencies in JSON::PP,
    # we alias *Types::Serialiser::Boolean with JSON::PP::Boolean.
@@ -107,26 +109,10 @@ BEGIN {
    *Types::Serialiser::Boolean:: = *JSON::PP::Boolean::;
 }
 
-{
-   # this must done before blessing to work around bugs
-   # in perl < 5.18 (it seems to be fixed in 5.18).
-   package Types::Serialiser::BooleanBase;
-
-   use overload
-      "0+"     => sub { ${$_[0]} },
-      "++"     => sub { $_[0] = ${$_[0]} + 1 },
-      "--"     => sub { $_[0] = ${$_[0]} - 1 },
-      fallback => 1;
-
-   @Types::Serialiser::Boolean::ISA = Types::Serialiser::BooleanBase::;
-}
-
-our $true  = do { bless \(my $dummy = 1), Types::Serialiser::Boolean:: };
-our $false = do { bless \(my $dummy = 0), Types::Serialiser::Boolean:: };
+our $true  = true;
+our $false = false;
 our $error = do { bless \(my $dummy    ), Types::Serialiser::Error::   };
 
-sub true  () { $true  }
-sub false () { $false }
 sub error () { $error }
 
 sub is_bool  ($) {           UNIVERSAL::isa $_[0], Types::Serialiser::Boolean:: }
